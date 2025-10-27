@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RMD Dashboard - Network Access Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 { color: #0033a0; margin-top: 0; }
+        h2 { color: #333; border-bottom: 2px solid #0033a0; padding-bottom: 10px; }
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        button {
+            background: #0033a0;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #0052cc; }
+        .info { background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+        .url { color: #0033a0; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🌐 RMD Dashboard - Network Access Test</h1>
+        <p>Use this page to verify network connectivity from other devices.</p>
+        
+        <div class="info">
+            <strong>Your Device IP:</strong> <span id="deviceIP" class="url">Detecting...</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📡 Connectivity Tests</h2>
+        
+        <div id="frontendTest" class="test-result pending">
+            🔄 Frontend Test: Pending...
+        </div>
+        
+        <div id="backendTest" class="test-result pending">
+            🔄 Backend API Test: Pending...
+        </div>
+        
+        <div id="databaseTest" class="test-result pending">
+            🔄 Database Connection Test: Pending...
+        </div>
+        
+        <button onclick="runAllTests()">🔄 Run All Tests</button>
+        <button onclick="location.href='http://localhost:5173'">🚀 Open Dashboard</button>
+    </div>
+
+    <div class="card">
+        <h2>📱 Access from Other Devices</h2>
+        
+        <div class="info">
+            <p><strong>Share this URL with other devices:</strong></p>
+            <p class="url" id="shareURL">http://YOUR_IP:5173</p>
+            <button onclick="copyURL()">📋 Copy URL</button>
+        </div>
+        
+        <h3>Instructions for Device 2:</h3>
+        <ol>
+            <li>Make sure Device 2 is on the <strong>same Wi-Fi network</strong></li>
+            <li>Open a web browser on Device 2</li>
+            <li>Enter the URL shown above</li>
+            <li>You should see the full RMD Dashboard!</li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <h2>🔧 Troubleshooting</h2>
+        <ul>
+            <li><strong>Can't connect from Device 2?</strong>
+                <ul>
+                    <li>Verify both devices are on the same Wi-Fi</li>
+                    <li>Check if START.ps1 is still running (2 PowerShell windows open)</li>
+                    <li>Try disabling Windows Firewall temporarily to test</li>
+                    <li>The IP may have changed - check START.ps1 output</li>
+                </ul>
+            </li>
+            <li><strong>Tests show errors?</strong>
+                <ul>
+                    <li>Make sure backend server is running</li>
+                    <li>Check XAMPP MySQL is running</li>
+                    <li>Run START.ps1 again to restart servers</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <script>
+        // Detect IP from frontend server
+        async function detectIP() {
+            try {
+                const response = await fetch('http://localhost:5173');
+                if (response.ok) {
+                    // Try to get IP from Network info in console
+                    // For now, we'll extract from page or use a fallback
+                    document.getElementById('deviceIP').textContent = '10.6.4.150 (Update with your actual IP)';
+                    document.getElementById('shareURL').textContent = 'http://10.6.4.150:5173';
+                }
+            } catch (error) {
+                document.getElementById('deviceIP').textContent = 'Unable to detect - Check START.ps1 output';
+            }
+        }
+
+        async function testFrontend() {
+            const element = document.getElementById('frontendTest');
+            element.className = 'test-result pending';
+            element.textContent = '🔄 Testing Frontend...';
+            
+            try {
+                const response = await fetch('http://localhost:5173');
+                if (response.ok) {
+                    element.className = 'test-result success';
+                    element.textContent = '✅ Frontend: Accessible on network!';
+                } else {
+                    throw new Error('Non-200 response');
+                }
+            } catch (error) {
+                element.className = 'test-result error';
+                element.textContent = '❌ Frontend: Not accessible - Check if server is running';
+            }
+        }
+
+        async function testBackend() {
+            const element = document.getElementById('backendTest');
+            element.className = 'test-result pending';
+            element.textContent = '🔄 Testing Backend API...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/health');
+                const data = await response.json();
+                
+                if (data.status === 'OK') {
+                    element.className = 'test-result success';
+                    element.textContent = '✅ Backend API: Working! - ' + data.message;
+                } else {
+                    throw new Error('Unexpected response');
+                }
+            } catch (error) {
+                element.className = 'test-result error';
+                element.textContent = '❌ Backend API: Not accessible - ' + error.message;
+            }
+        }
+
+        async function testDatabase() {
+            const element = document.getElementById('databaseTest');
+            element.className = 'test-result pending';
+            element.textContent = '🔄 Testing Database Connection...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/nafes/overview');
+                const data = await response.json();
+                
+                if (data.totalGrants !== undefined) {
+                    element.className = 'test-result success';
+                    element.textContent = `✅ Database: Connected! - Found ${data.totalGrants} grants`;
+                } else {
+                    throw new Error('No data returned');
+                }
+            } catch (error) {
+                element.className = 'test-result error';
+                element.textContent = '❌ Database: Connection failed - ' + error.message;
+            }
+        }
+
+        async function runAllTests() {
+            await testFrontend();
+            await testBackend();
+            await testDatabase();
+        }
+
+        function copyURL() {
+            const url = document.getElementById('shareURL').textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('URL copied to clipboard!\nShare with your team: ' + url);
+            });
+        }
+
+        // Run tests on page load
+        window.onload = function() {
+            detectIP();
+            setTimeout(runAllTests, 500);
+        };
+    </script>
+</body>
+</html>

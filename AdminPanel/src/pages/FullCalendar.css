@@ -1,0 +1,116 @@
+.fc {
+  width: 100% !important;
+  min-width: 0;
+  max-width: 100vw;
+}
+/* FullCalendar.css - styles for the FullCalendar component */
+.full-calendar-container {
+  width: 100%;
+  max-width: 100vw;
+  min-width: 320px;
+  margin: 0 auto 48px auto;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 6px 32px rgba(0,51,160,0.13);
+  padding: 32px 2vw 40px 2vw;
+  box-sizing: border-box;
+}
+
+.fc .fc-toolbar-title {
+  color: #0033a0;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  font-size: 2.1rem;
+}
+
+.fc .fc-button {
+  background: #0039a6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.fc .fc-button:hover, .fc .fc-button:focus {
+  background: #0052cc;
+  color: #fff;
+}
+
+.fc .fc-daygrid-day-number {
+  color: #0033a0;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  background: #eaf2ff;
+  border-radius: 8px;
+}
+
+.fc .fc-daygrid-event {
+  background: #60a5fa;
+  color: #0033a0;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 2px 6px;
+}
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.calendar-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0033a0;
+  letter-spacing: 1px;
+}
+.calendar-nav {
+  background: #eaf2ff;
+  border: none;
+  border-radius: 6px;
+  color: #0033a0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.calendar-nav:hover {
+  background: #d0e3ff;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.calendar-cell {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-family: 'Fira Sans', Arial, sans-serif;
+  color: #222;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+.calendar-day {
+  font-weight: 700;
+  color: #0033a0;
+  background: #eaf2ff;
+}
+.calendar-cell.today {
+  background: #0033a0;
+  color: #fff;
+  font-weight: 700;
+  border: 2px solid #60a5fa;
+}
+.calendar-cell.empty {
+  background: transparent;
+  cursor: default;
+}

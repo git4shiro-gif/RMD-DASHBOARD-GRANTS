@@ -1,0 +1,47 @@
+# Node
+node_modules/
+package-lock.json
+npm-debug.log
+.yarn/
+
+# Build
+dist/
+build/
+
+# Env
+.env
+.env.*
+
+# OS
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Uploads and temp
+uploads/
+tmp/
+
+# Ignore user profile cruft (Windows)
+AppData/
+Cookies/
+Recent/
+OneDrive/
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Ignore sensitive personal files
+*.xlsx
+*.docx
+"Desktop/### Dashboard Application Guide Pro.txt"
+"Desktop/14 October 2025.docx"

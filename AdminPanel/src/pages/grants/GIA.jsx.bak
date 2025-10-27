@@ -1,0 +1,416 @@
+import React, { useState, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
+import { schoolYears, yearData, getChartDataByYear } from '../../data/dashboardData'
+import { 
+  PieChart, Pie, Cell,
+  BarChart, Bar, 
+  LineChart, Line,
+  XAxis, YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from 'recharts'
+import { FaHome, FaUpload, FaFolderOpen, FaMoneyBillWave, FaSpinner, FaCheckCircle } from 'react-icons/fa';
+
+function GIA() {
+  const [selectedYear, setSelectedYear] = useState('2022 - 2023')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [visibleCharts, setVisibleCharts] = useState({})
+  const chartRefs = useRef({})
+
+  const currentData = yearData[selectedYear]
+  const chartData = getChartDataByYear(selectedYear)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleCharts((prev) => ({
+              ...prev,
+              [entry.target.dataset.chartId]: true
+            }))
+          }
+        })
+      },
+      { threshold: 0.2 }
+    )
+
+    Object.values(chartRefs.current).forEach((ref) => {
+      if (ref) observer.observe(ref)
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
+  // Sample GIA-specific data
+  const giaData = {
+    overview: {
+      totalGrants: 45,
+      totalAmount: 12500000,
+      activeProjects: 38,
+      completedProjects: 7
+    },
+    distribution: [
+      { name: 'Research', value: 28, color: '#0033a0' },
+      { name: 'Extension', value: 17, color: '#0052cc' },
+    ],
+    yearlyTrends: [
+      { year: '2020', grants: 25, amount: 8000000 },
+      { year: '2021', grants: 32, amount: 9500000 },
+      { year: '2022', grants: 38, amount: 11000000 },
+      { year: '2023', grants: 45, amount: 12500000 },
+    ]
+  }
+
+  return (
+    <main className='main-container' style={{ 
+      padding: '20px', 
+      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
+      minHeight: '100vh'
+    }}>
+      <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
+        {/* Header */}
+        <div style={{
+          marginBottom: '30px',
+          borderBottom: '2px solid rgba(0, 51, 160, 0.1)',
+          paddingBottom: '20px'
+        }}>
+          <h1 style={{
+            color: '#1e293b',
+            fontSize: '2rem',
+            fontWeight: '700',
+            margin: '0 0 8px 0'
+          }}>
+            Grants-In-Aid (GIA) for Research and Extension
+          </h1>
+          <p style={{
+            color: '#64748b',
+            fontSize: '1rem',
+            margin: '0 0 10px 0'
+          }}>
+            CMO No. 52, s. 2016
+          </p>
+          <p style={{
+            color: '#64748b',
+            fontSize: '0.9rem',
+            margin: '0',
+            lineHeight: '1.5'
+          }}>
+            Grants-in-Aid for Research and Extension programs supporting faculty development and institutional capacity building.
+          </p>
+        </div>
+
+        {/* Home Button and Year Filter Row */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          gap: '20px',
+          marginBottom: '30px',
+          flexWrap: 'wrap'
+        }}>
+          {/* Left Side - Home and Upload Buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {/* Home Button */}
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'linear-gradient(135deg, #0033a0 0%, #0052cc 100%)',
+                color: '#fff',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgba(0, 51, 160, 0.2)',
+                fontWeight: '600',
+                fontSize: '14px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 51, 160, 0.3)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 51, 160, 0.2)'
+              }}>
+                <FaHome style={{ fontSize: '16px' }} />
+                <span>Home</span>
+              </div>
+            </Link>
+
+            {/* Upload Grant Button */}
+            <div 
+              title="Upload CSV File"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'linear-gradient(135deg, #0033a0 0%, #0052cc 100%)',
+                color: '#fff',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgba(0, 51, 160, 0.2)',
+                fontWeight: '600',
+                fontSize: '14px',
+                position: 'relative'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 51, 160, 0.3)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 51, 160, 0.2)'
+              }}
+              onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = '.csv'
+                input.onchange = (e) => {
+                  const file = e.target.files[0]
+                  if (file) {
+                    console.log('File selected:', file.name)
+                    // Add your CSV upload logic here
+                  }
+                }
+                input.click()
+              }}
+            >
+              <FaUpload style={{ fontSize: '16px' }} />
+              <span>Upload Grant</span>
+            </div>
+          </div>
+
+          {/* Year Filter */}
+          <div style={{ position: 'relative', minWidth: '220px' }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #0033a0 0%, #0052cc 100%)',
+              borderRadius: '12px',
+              padding: '12px 20px',
+              cursor: 'pointer',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              color: '#fff',
+              fontWeight: '600',
+              boxShadow: '0 4px 12px rgba(0, 51, 160, 0.2)'
+            }}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+              <div>
+                <div style={{ fontSize: '12px', opacity: '0.7', marginBottom: '2px' }}>School Year</div>
+                <div style={{ fontSize: '16px' }}>{selectedYear}</div>
+              </div>
+              <span style={{ 
+                fontSize: '20px',
+                transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.3s ease'
+              }}>▼</span>
+            </div>
+
+            {isDropdownOpen && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: '0',
+                right: '0',
+                marginTop: '8px',
+                background: 'rgba(255, 255, 255, 0.98)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(0, 51, 160, 0.15)',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                boxShadow: '0 10px 30px rgba(0, 51, 160, 0.15)',
+                zIndex: '100'
+              }}>
+                {schoolYears.map((year) => (
+                  <div
+                    key={year}
+                    style={{
+                      padding: '12px 20px',
+                      cursor: 'pointer',
+                      color: selectedYear === year ? '#0033a0' : '#1e293b',
+                      background: selectedYear === year ? 'rgba(0, 51, 160, 0.05)' : 'transparent',
+                      fontWeight: selectedYear === year ? '700' : '500',
+                      borderLeft: selectedYear === year ? '4px solid #0033a0' : '4px solid transparent'
+                    }}
+                    onClick={() => {
+                      setSelectedYear(year)
+                      setIsDropdownOpen(false)
+                    }}
+                  >
+                    {year}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Summary Cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '20px',
+          marginBottom: '40px'
+        }}>
+          {[
+            { title: 'Total Grants', subtitle: 'All GIA grants', value: giaData.overview.totalGrants, icon: FaFolderOpen, color: '#0033a0' },
+            { title: 'Total Amount', subtitle: 'Budget approved', value: `₱${giaData.overview.totalAmount.toLocaleString()}`, icon: FaMoneyBillWave, color: '#0052cc' },
+            { title: 'Active Projects', subtitle: 'Currently ongoing', value: giaData.overview.activeProjects, icon: FaSpinner, color: '#0066cc' },
+            { title: 'Completed Projects', subtitle: 'Successfully finished', value: giaData.overview.completedProjects, icon: FaCheckCircle, color: '#00aa55' }
+          ].map((card, index) => {
+            const IconComponent = card.icon
+            return (
+              <div key={index} style={{
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '16px',
+                padding: '24px',
+                border: '1px solid rgba(0, 51, 160, 0.1)',
+                boxShadow: '0 8px 32px rgba(0, 51, 160, 0.1)',
+                transition: 'transform 0.3s ease'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                  <IconComponent style={{ fontSize: '24px', marginRight: '12px', color: card.color }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ color: '#0052cc', fontSize: '14px', fontWeight: '600' }}>{card.title}</div>
+                    <div style={{ color: '#64748b', fontSize: '11px', marginTop: '2px' }}>{card.subtitle}</div>
+                  </div>
+                </div>
+                <div style={{ color: '#1e293b', fontSize: '28px', fontWeight: '700', marginLeft: '36px' }}>
+                  {card.value}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Charts */}
+        <div className='charts-row' style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+          gap: '20px',
+          marginBottom: '40px'
+        }}>
+          <div 
+            ref={(el) => (chartRefs.current['chart1'] = el)}
+            data-chart-id="chart1"
+            className={`chart-card ${visibleCharts['chart1'] ? 'chart-visible' : ''}`}
+            style={{
+              background: '#ffffff',
+              padding: '25px',
+              borderRadius: '20px',
+              boxShadow: '0 8px 24px rgba(0, 51, 160, 0.1)',
+              height: '400px'
+            }}
+          >
+            <h4 style={{ margin: '0 0 15px 0', color: '#0f172a', fontSize: '18px', fontWeight: '700' }}>
+              GIA Distribution
+            </h4>
+            <ResponsiveContainer width="100%" height="90%">
+              <PieChart>
+                <Pie
+                  data={giaData.distribution}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, value }) => `${name}: ${value}`}
+                >
+                  {giaData.distribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div 
+            ref={(el) => (chartRefs.current['chart2'] = el)}
+            data-chart-id="chart2"
+            className={`chart-card ${visibleCharts['chart2'] ? 'chart-visible' : ''}`}
+            style={{
+              background: '#ffffff',
+              padding: '25px',
+              borderRadius: '20px',
+              boxShadow: '0 8px 24px rgba(0, 51, 160, 0.1)',
+              height: '400px'
+            }}
+          >
+            <h4 style={{ margin: '0 0 15px 0', color: '#0f172a', fontSize: '18px', fontWeight: '700' }}>
+              GIA Yearly Trends
+            </h4>
+            <ResponsiveContainer width="100%" height="90%">
+              <BarChart data={giaData.yearlyTrends}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.2)" />
+                <XAxis dataKey="year" stroke="#0f172a" />
+                <YAxis stroke="#0f172a" />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="grants" fill="#0033a0" radius={[10, 10, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Financial Trends */}
+        <div 
+          ref={(el) => (chartRefs.current['chart3'] = el)}
+          data-chart-id="chart3"
+          className={`chart-card ${visibleCharts['chart3'] ? 'chart-visible' : ''}`}
+          style={{
+            background: '#ffffff',
+            padding: '25px',
+            borderRadius: '20px',
+            boxShadow: '0 8px 24px rgba(0, 51, 160, 0.1)',
+            height: '400px',
+            marginBottom: '40px'
+          }}
+        >
+          <h4 style={{ margin: '0 0 15px 0', color: '#0f172a', fontSize: '18px', fontWeight: '700' }}>
+            GIA Financial Trends
+          </h4>
+          <ResponsiveContainer width="100%" height="90%">
+            <LineChart data={giaData.yearlyTrends}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.2)" />
+              <XAxis dataKey="year" stroke="#0f172a" />
+              <YAxis stroke="#0f172a" />
+              <Tooltip formatter={(value) => [`₱${value.toLocaleString()}`, 'Amount']} />
+              <Legend />
+              <Line type="monotone" dataKey="amount" stroke="#0033a0" strokeWidth={3} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <style>{`
+        .chart-card {
+          opacity: 0;
+          transform: translateY(50px) scale(0.95);
+          transition: all 0.3s ease;
+        }
+        
+        .chart-card.chart-visible {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        
+        .chart-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 16px 48px rgba(0, 51, 160, 0.15) !important;
+        }
+      `}</style>
+    </main>
+  )
+}
+
+export default GIA

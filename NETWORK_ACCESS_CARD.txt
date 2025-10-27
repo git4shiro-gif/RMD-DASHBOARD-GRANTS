@@ -1,0 +1,37 @@
+# 📱 Quick Access Card - Share with Team
+
+## ⚡ Access Dashboard from Other Devices
+
+### Device 2/3/4 - Just Open Browser:
+
+```
+http://10.6.4.150:5173
+```
+
+✅ No installation needed
+✅ See all data immediately
+✅ Works on phones/tablets too!
+
+---
+
+## Current Device 1 Info:
+
+- **IP:** 10.6.4.150
+- **Dashboard:** http://10.6.4.150:5173
+- **API:** http://10.6.4.150:5000
+
+*IP may change daily - check START.ps1 output*
+
+---
+
+## Quick Test (Device 2):
+
+```powershell
+Test-NetConnection -ComputerName 10.6.4.150 -Port 5173
+```
+
+Should show: `TcpTestSucceeded : True`
+
+---
+
+**For full setup instructions, see:** `DEVICE2_SETUP_GUIDE.md`
