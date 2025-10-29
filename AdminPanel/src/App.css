@@ -1,3 +1,156 @@
+.nav-btn {
+  text-decoration: none !important;
+}
+.sidebar-nav .nav-btn {
+  text-decoration: none !important;
+}
+.header {
+  padding-left: 32px;
+  padding-right: 32px;
+  box-sizing: border-box;
+}
+
+.header-row-flex {
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+
+@media (max-width: 900px) {
+  .header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}
+html, body {
+  overflow-x: hidden;
+}
+/* Flex row for header: menu, nav, right logo */
+.header-row-flex {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 60px;
+  margin-left: 12px;
+}
+
+@media (max-width: 900px) {
+  .header-row-flex {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+  }
+  .header-right {
+    margin-left: 8px;
+    min-width: 40px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header-row-flex {
+    padding: 0 4px;
+  }
+  .header-right img {
+    height: 28px;
+    max-width: 90px;
+  }
+}
+/* Sidebar styles for mobile nav */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.35);
+  z-index: 3000;
+  transition: opacity 0.2s;
+}
+.sidebar-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 85vw;
+  max-width: 340px;
+  background: #fff;
+  box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+  z-index: 3100;
+  display: flex;
+  flex-direction: column;
+  padding: 36px 0 0 0;
+  animation: sidebarSlideIn 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+.sidebar-close {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 2.2rem;
+  color: #0033a0;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.2s;
+  z-index: 3201;
+}
+.sidebar-nav .dropdown-menu {
+  position: static;
+  box-shadow: none;
+  border: none;
+  background: #f9f9f9;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+}
+.sidebar-nav .dropdown-item {
+  padding-left: 36px;
+  padding-right: 24px;
+  background: none;
+  color: #0033a0;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1.05rem;
+  border-bottom: 1px solid #f1f1f1;
+}
+.sidebar-nav .dropdown-item:last-child {
+  border-bottom: none;
+}
+.sidebar-nav .nav-dropdown {
+  width: 100%;
+  margin: 0;
+}
+.sidebar-nav .nav-dropdown > .nav-btn {
+  width: 100%;
+  text-align: left;
+  margin: 0;
+}
+.sidebar-nav .nav-btn:active, .sidebar-nav .ched-brand:active {
+  background: #eaf2ff !important;
+  color: #0033a0 !important;
+}
+@keyframes sidebarSlideIn {
+  from { transform: translateX(-100%); opacity: 0.5; }
+  to { transform: translateX(0); opacity: 1; }
+}
 /* Show mobile menu icon only on mobile */
 .header-left-mobile-menu {
   display: none;
@@ -6,6 +159,119 @@
   .header-left-mobile-menu {
     display: flex !important;
     align-items: center;
+  }
+  .header {
+    flex-direction: row;
+    padding: 0 10px;
+    height: 56px;
+    gap: 0;
+  }
+  .main-nav {
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: #fff;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    z-index: 2000;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    pointer-events: none;
+  }
+  .main-nav.nav-open {
+    display: flex !important;
+    max-height: 500px;
+    opacity: 1;
+    padding-bottom: 10px;
+    pointer-events: auto;
+    z-index: 2000;
+  }
+  .sidebar-nav .nav-btn,
+  .sidebar-nav .ched-brand {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border-radius: 0;
+    padding: 16px 24px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 1.08rem;
+    font-weight: 600;
+    background: none;
+    color: #0033a0 !important;
+    margin: 0;
+  }
+  .sidebar-nav .nav-dropdown {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  .sidebar-nav .nav-dropdown > .nav-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 16px 24px;
+    border-radius: 0;
+    border-bottom: 1px solid #f1f1f1;
+    background: none;
+    color: #0033a0 !important;
+    font-size: 1.08rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  .main-nav .ched-brand {
+    text-align: left;
+    letter-spacing: 1.5px;
+    font-size: 1.12rem;
+    font-weight: 700;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .main-nav .dropdown-menu {
+    position: static;
+    box-shadow: none;
+    border: none;
+    background: #f9f9f9;
+    min-width: 100%;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+  }
+  .main-nav .dropdown-item {
+    padding-left: 36px;
+    padding-right: 24px;
+    background: none;
+    color: #0033a0;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1.05rem;
+    border-bottom: 1px solid #f1f1f1;
+  }
+  .main-nav .dropdown-item:last-child {
+    border-bottom: none;
+  }
+  .main-nav .nav-dropdown {
+    width: 100%;
+    margin: 0;
+  }
+  .main-nav .nav-dropdown > .nav-btn {
+    width: 100%;
+    text-align: left;
+    margin: 0;
+  }
+  .main-nav .nav-btn:active, .main-nav .ched-brand:active {
+    background: #eaf2ff !important;
+    color: #0033a0 !important;
+  }
+  .menu-icon {
+    display: flex;
+  }
+  .header-right {
+    display: none;
   }
 }
 .ched-banner-left, .ched-banner-right {
@@ -145,9 +411,11 @@
   transition: all 0.3s;
 }
 
+
 @media (max-width: 900px) {
   .menu-icon {
-    display: flex;
+    display: flex !important;
+    z-index: 3200;
   }
   .header-right {
     display: none;
@@ -703,44 +971,30 @@ p, span, a, button, input, textarea, select,
 
 /* Extra Small <= 576px */
 @media screen and (max-width: 576px) {
-  /* Keep left logo visible on small screens and make header more compact */
   .header {
-    padding: 0 12px;
-    height: 56px;
-    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 4px;
+    height: auto;
+    gap: 0;
   }
-
   .header-left {
-    display: flex;
-    align-items: center;
     min-width: 0;
   }
-
-  .header-left img {
-    height: 34px;
-    width: auto;
-    max-width: 120px;
-  }
-
+  .header-left img,
   .header-right img {
-    height: 34px;
-    width: auto;
-    max-width: 120px;
+    height: 28px;
+    max-width: 90px;
   }
-
-  .menu-icon .icon {
-    height: 42px;
-    width: auto;
-    font-size: 28px;
+  .main-nav {
+    top: 48px;
+    font-size: 0.98rem;
   }
-
-  #sidebar {
-    width: 85vw;
-  }
-
-  .sidebar-list-item a,
-  .sidebar-list-item Link {
-    font-size: clamp(0.813rem, 3.5vw, 0.938rem);
+  .menu-icon {
+    width: 36px;
+    height: 36px;
+    display: flex !important;
+    z-index: 3200;
   }
 }
 
