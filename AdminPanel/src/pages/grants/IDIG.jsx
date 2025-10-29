@@ -103,15 +103,16 @@ function IDIG() {
           fetch(`${API_BASE}/hei-type${yearParam}`),
           fetch(`${API_BASE}/status${yearParam}`)
         ]);
-        const overview = await overviewRes.json();
-        const priorityArea = await priorityRes.json();
-        const yearlyTrends = await yearlyRes.json();
-        const regionData = await regionRes.json();
-        const heiType = await heiRes.json();
-        const status = await statusRes.json();
+        // Use the 2nd row (index 1) as reference for all data arrays if available
+        const overviewArr = await overviewRes.json();
+        const priorityArr = await priorityRes.json();
+        const yearlyArr = await yearlyRes.json();
+        const regionArr = await regionRes.json();
+        const heiArr = await heiRes.json();
+        const statusArr = await statusRes.json();
         const colors = ['#0033a0', '#0052cc', '#3b82f6', '#60a5fa', '#93c5fd'];
-        const priorityWithColors = priorityArea.map((item, index) => ({ ...item, color: colors[index % colors.length] }));
-        const heiWithColors = heiType.map((item, index) => ({ ...item, color: colors[index % colors.length] }));
+        const priorityWithColors = Array.isArray(priorityArr) ? priorityArr.map((item, index) => ({ ...item, color: colors[index % colors.length] })) : [];
+        const heiWithColors = Array.isArray(heiArr) ? heiArr.map((item, index) => ({ ...item, color: colors[index % colors.length] })) : [];
         const statusColors = {
           'Completed': '#10b981',
           'Due': '#f59e0b',
@@ -120,14 +121,17 @@ function IDIG() {
           'Overdue': '#dc2626',
           'Ongoing': '#3b82f6'
         };
-        const statusWithColors = status.map(item => ({ ...item, color: statusColors[item.name] || '#64748b' }));
+        const statusWithColors = Array.isArray(statusArr) ? statusArr.map(item => ({ ...item, color: statusColors[item.name] || '#64748b' })) : [];
+
+        // Use 2nd row (index 1) as reference for summary/overview if available
+        const overview = Array.isArray(overviewArr) && overviewArr.length > 1 ? overviewArr[1] : (Array.isArray(overviewArr) && overviewArr.length > 0 ? overviewArr[0] : overviewArr);
         setIdigData({
           overview,
-          priorityArea: priorityWithColors.length > 0 ? priorityWithColors : [],
-          yearlyTrends: yearlyTrends.length > 0 ? yearlyTrends : [],
-          regionData: regionData.length > 0 ? regionData : [],
-          heiType: heiWithColors.length > 0 ? heiWithColors : [],
-          status: statusWithColors.length > 0 ? statusWithColors : []
+          priorityArea: priorityWithColors,
+          yearlyTrends: yearlyArr,
+          regionData: regionArr,
+          heiType: heiWithColors,
+          status: statusWithColors
         });
         setLoading(false);
       } catch (error) {
@@ -250,7 +254,13 @@ function IDIG() {
               </div>
               <span style={{ fontSize: '20px', transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>▼</span>
             </div>
-            {isDropdownOpen && (<div style={{ position: 'absolute', top: '100%', left: '0', right: '0', marginTop: '8px', background: 'rgba(255, 255, 255, 0.98)', backdropFilter: 'blur(10px)', border: '1px solid rgba(0, 51, 160, 0.15)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0, 51, 160, 0.15)', zIndex: '100' }}>{fiscalYears.map(year => (<div key={year} style={{ padding: '12px 20px', cursor: 'pointer', color: selectedYear === year ? '#0033a0' : '#1e293b', background: selectedYear === year ? 'rgba(0, 51, 160, 0.05)' : 'transparent', fontWeight: selectedYear === year ? '700' : '500', borderLeft: selectedYear === year ? '4px solid #0033a0' : '4px solid transparent' }} onClick={() => { setSelectedYear(year); setIsDropdownOpen(false); }}>FY {year}</div>))}</div>)}
+            {isDropdownOpen && (
+              <div style={{ position: 'absolute', top: '100%', left: '0', right: '0', marginTop: '8px', background: 'rgba(255, 255, 255, 0.98)', backdropFilter: 'blur(10px)', border: '1px solid rgba(0, 51, 160, 0.15)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0, 51, 160, 0.15)', zIndex: '100' }}>
+                {fiscalYears.map(year => (
+                  <div key={year} style={{ padding: '12px 20px', cursor: 'pointer', color: selectedYear === year ? '#0033a0' : '#1e293b', background: selectedYear === year ? 'rgba(0, 51, 160, 0.05)' : 'transparent', fontWeight: selectedYear === year ? '700' : '500', borderLeft: selectedYear === year ? '4px solid #0033a0' : '4px solid transparent' }} onClick={() => { setSelectedYear(year); setIsDropdownOpen(false); }}>FY {year}</div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         {/* Summary Cards */}
@@ -271,6 +281,318 @@ function IDIG() {
               <div style={{ fontWeight: 800, fontSize: 28, color: card.color }}>{card.value}</div>
             </div>
           ))}
+        </div>
+
+        {/* Charts Section */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '48px', marginBottom: '48px' }}>
+          {/* 1. Per Priority Area (Bar) - NAFES style */}
+          <div
+            style={{
+              background: '#ffffff',
+              padding: '32px',
+              borderRadius: '24px',
+              boxShadow: '0 4px 20px rgba(0, 51, 160, 0.08)',
+              border: '1px solid rgba(0, 51, 160, 0.08)',
+              height: '720px',
+              marginBottom: '32px'
+            }}
+          >
+            <h4 style={{ margin: '0 0 20px 0', color: '#0f172a', fontSize: '1.25rem', fontWeight: '700', letterSpacing: '-0.01em' }}>
+              Per Priority Area (Number of Projects)
+            </h4>
+            {idigData.priorityArea.length === 0 ? (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%', color: '#64748b' }}>
+                <p>No data available</p>
+              </div>
+            ) : (
+            <>
+            <ResponsiveContainer width="100%" height="90%">
+              <BarChart
+                data={idigData.priorityArea}
+                layout="vertical"
+                margin={{ top: 5, right: 20, left: 5, bottom: 5 }}
+                barGap={8}
+                barCategoryGap={15}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" strokeOpacity={0.6} />
+                <XAxis
+                  type="number"
+                  stroke="#475569"
+                  style={{ fontSize: '12px', fontWeight: '500' }}
+                  tickFormatter={formatNumber}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="area"
+                  stroke="#475569"
+                  style={{ fontSize: '11px', fontWeight: '500' }}
+                  width={240}
+                  interval={0}
+                  tick={{ width: 230, wordWrap: 'break-word' }}
+                />
+                <Tooltip
+                  formatter={(value) => formatNumber(value)}
+                  labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
+                  contentStyle={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: '12px', fontWeight: '600' }} />
+                <Bar dataKey="projects" name="Projects" radius={[0, 8, 8, 0]}>
+                  {idigData.priorityArea.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '15px',
+              marginTop: '10px',
+              padding: '15px 20px',
+              background: 'linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%)',
+              borderRadius: '12px',
+              border: '2px solid #0033a0',
+              overflow: 'hidden'
+            }}>
+              <div style={{ fontSize: '16px', color: '#64748b', fontWeight: '600', lineHeight: '1', flexShrink: 0 }}>
+                Total Projects
+              </div>
+              <div style={{
+                fontSize: '20px',
+                color: '#0033a0',
+                fontWeight: '700',
+                lineHeight: '1',
+                textAlign: 'right',
+                wordBreak: 'break-all',
+                maxWidth: '70%'
+              }}>
+                {formatNumber(idigData.priorityArea.reduce((sum, item) => sum + (item.projects || 0), 0))}
+              </div>
+            </div>
+            </>
+            )}
+          </div>
+
+          {/* 2. Per Year Awarded (Bar, Line) - NAFES style */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '48px' }}>
+            {/* Bar Chart: Projects per Year */}
+            <div
+              style={{
+                background: '#ffffff',
+                padding: '32px',
+                borderRadius: '24px',
+                boxShadow: '0 4px 20px rgba(0, 51, 160, 0.08)',
+                border: '1px solid rgba(0, 51, 160, 0.08)',
+                height: '420px'
+              }}
+            >
+              <h4 style={{ margin: '0 0 20px 0', color: '#0f172a', fontSize: '1.25rem', fontWeight: '700', letterSpacing: '-0.01em' }}>
+                Per Year Awarded (Number of Projects)
+              </h4>
+              {idigData.yearlyTrends.length === 0 ? (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%', color: '#64748b' }}>
+                  <p>No data available</p>
+                </div>
+              ) : (
+              <ResponsiveContainer width="100%" height="90%">
+                <BarChart data={idigData.yearlyTrends} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" strokeOpacity={0.6} />
+                  <XAxis dataKey="year" stroke="#475569" style={{ fontSize: '12px', fontWeight: '500' }} />
+                  <YAxis stroke="#475569" style={{ fontSize: '12px', fontWeight: '500' }} />
+                  <Tooltip
+                    formatter={(value) => formatNumber(value)}
+                    labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '12px', fontWeight: '600' }} />
+                  <Bar dataKey="projects" fill="#3b82f6" radius={[10, 10, 0, 0]} name="Projects" />
+                </BarChart>
+              </ResponsiveContainer>
+              )}
+            </div>
+            {/* Line Chart: Amount Trend per Year */}
+            <div
+              style={{
+                background: '#ffffff',
+                padding: '32px',
+                borderRadius: '24px',
+                boxShadow: '0 4px 20px rgba(0, 51, 160, 0.08)',
+                border: '1px solid rgba(0, 51, 160, 0.08)',
+                height: '420px'
+              }}
+            >
+              <h4 style={{ margin: '0 0 20px 0', color: '#0f172a', fontSize: '1.25rem', fontWeight: '700', letterSpacing: '-0.01em' }}>
+                Per Year Awarded (Amount Trend)
+              </h4>
+              <ResponsiveContainer width="100%" height="90%">
+                <LineChart data={idigData.yearlyTrends} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" strokeOpacity={0.6} />
+                  <XAxis dataKey="year" stroke="#475569" style={{ fontSize: '12px', fontWeight: '500' }} />
+                  <YAxis
+                    stroke="#475569"
+                    style={{ fontSize: '12px', fontWeight: '500' }}
+                    tickFormatter={formatAmountShort}
+                  />
+                  <Tooltip
+                    formatter={(value) => formatAmount(value)}
+                    labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '12px', fontWeight: '600' }} />
+                  <Line
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="#3b82f6"
+                    strokeWidth={3}
+                    name="Amount"
+                    dot={{ fill: '#3b82f6', r: 5 }}
+                    activeDot={{ r: 7 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* 3. Per Region (Bar) - NAFES style */}
+          <div
+            style={{
+              background: '#ffffff',
+              padding: '32px',
+              borderRadius: '24px',
+              boxShadow: '0 4px 20px rgba(0, 51, 160, 0.08)',
+              border: '1px solid rgba(0, 51, 160, 0.08)',
+              height: '420px',
+              marginBottom: '32px'
+            }}
+          >
+            <h4 style={{ margin: '0 0 20px 0', color: '#0f172a', fontSize: '1.25rem', fontWeight: '700', letterSpacing: '-0.01em' }}>
+              Per Region (Number of Projects)
+            </h4>
+            {idigData.regionData.length === 0 ? (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%', color: '#64748b' }}>
+                <p>No data available</p>
+              </div>
+            ) : (
+            <ResponsiveContainer width="100%" height="90%">
+              <BarChart data={idigData.regionData} layout="vertical" margin={{ top: 5, right: 20, left: 5, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" strokeOpacity={0.6} />
+                <XAxis type="number" stroke="#475569" style={{ fontSize: '12px', fontWeight: '500' }} tickFormatter={formatNumber} />
+                <YAxis dataKey="region" type="category" stroke="#475569" style={{ fontSize: '11px', fontWeight: '500' }} width={180} interval={0} tick={{ width: 170, wordWrap: 'break-word' }} />
+                <Tooltip formatter={(value) => formatNumber(value)} labelStyle={{ color: '#0f172a', fontWeight: 'bold' }} contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.98)', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }} />
+                <Legend wrapperStyle={{ fontSize: '12px', fontWeight: '600' }} />
+                <Bar dataKey="projects" fill="#3b82f6" radius={[0, 8, 8, 0]} name="Projects" />
+              </BarChart>
+            </ResponsiveContainer>
+            )}
+          </div>
+
+          {/* 4. Per HEI Type (Pie) - NAFES style */}
+          <div
+            style={{
+              background: '#ffffff',
+              padding: '32px',
+              borderRadius: '24px',
+              boxShadow: '0 4px 20px rgba(0, 51, 160, 0.08)',
+              border: '1px solid rgba(0, 51, 160, 0.08)',
+              marginBottom: '32px'
+            }}
+          >
+            <h4 style={{ margin: '0 0 20px 0', color: '#0f172a', fontSize: '1.25rem', fontWeight: '700', letterSpacing: '-0.01em' }}>
+              Per HEI Type (Number of Projects)
+            </h4>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', justifyContent: 'center' }}>
+              <div style={{ width: 340, height: 340 }}>
+                <PieChart width={340} height={340}>
+                  <Pie data={idigData.heiType} dataKey="projects" nameKey="type" cx="50%" cy="50%" outerRadius={110} label>
+                    {idigData.heiType.map((entry, idx) => (
+                      <Cell key={`cell-hei-${idx}`} fill={entry.color || '#6366f1'} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={formatNumber} />
+                  <Legend />
+                </PieChart>
+                <div style={{ textAlign: 'center', fontWeight: 600, color: '#64748b', marginTop: 8 }}>
+                  # of Projects
+                </div>
+              </div>
+              <div style={{ width: 340, height: 340 }}>
+                <PieChart width={340} height={340}>
+                  <Pie data={idigData.heiType} dataKey="amount" nameKey="type" cx="50%" cy="50%" outerRadius={110} label>
+                    {idigData.heiType.map((entry, idx) => (
+                      <Cell key={`cell-hei-amt-${idx}`} fill={entry.color || '#f59e0b'} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={formatAmountShort} />
+                  <Legend />
+                </PieChart>
+                <div style={{ textAlign: 'center', fontWeight: 600, color: '#64748b', marginTop: 8 }}>
+                  Amount
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 5. Status (Pie) - NAFES style */}
+          <div
+            style={{
+              background: '#ffffff',
+              padding: '32px',
+              borderRadius: '24px',
+              boxShadow: '0 4px 20px rgba(0, 51, 160, 0.08)',
+              border: '1px solid rgba(0, 51, 160, 0.08)',
+              marginBottom: '32px'
+            }}
+          >
+            <h4 style={{ margin: '0 0 20px 0', color: '#0f172a', fontSize: '1.25rem', fontWeight: '700', letterSpacing: '-0.01em' }}>
+              Status (Number of Projects)
+            </h4>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', justifyContent: 'center' }}>
+              <div style={{ width: 340, height: 340 }}>
+                <PieChart width={340} height={340}>
+                  <Pie data={idigData.status} dataKey="projects" nameKey="status" cx="50%" cy="50%" outerRadius={110} label>
+                    {idigData.status.map((entry, idx) => (
+                      <Cell key={`cell-status-${idx}`} fill={entry.color || '#3b82f6'} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={formatNumber} />
+                  <Legend />
+                </PieChart>
+                <div style={{ textAlign: 'center', fontWeight: 600, color: '#64748b', marginTop: 8 }}>
+                  # of Projects
+                </div>
+              </div>
+              <div style={{ width: 340, height: 340 }}>
+                <PieChart width={340} height={340}>
+                  <Pie data={idigData.status} dataKey="amount" nameKey="status" cx="50%" cy="50%" outerRadius={110} label>
+                    {idigData.status.map((entry, idx) => (
+                      <Cell key={`cell-status-amt-${idx}`} fill={entry.color || '#10b981'} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={formatAmountShort} />
+                  <Legend />
+                </PieChart>
+                <div style={{ textAlign: 'center', fontWeight: 600, color: '#64748b', marginTop: 8 }}>
+                  Amount
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
     </main>
   );

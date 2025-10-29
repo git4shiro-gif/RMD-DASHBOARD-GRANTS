@@ -65,15 +65,12 @@ router.get('/priority-area', async (req, res) => {
       FROM idig_grants
       WHERE priority_area IS NOT NULL AND priority_area != ''
     `;
-    
     const params = [];
     if (year && year !== 'All') {
       query += ' AND year_awarded = ?';
       params.push(year);
     }
-    
-    query += ' GROUP BY TRIM(priority_area) ORDER BY amount DESC';
-
+    query += ' GROUP BY area ORDER BY amount DESC';
     const [results] = await db.query(query, params);
     res.json(results);
   } catch (error) {
@@ -95,7 +92,6 @@ router.get('/yearly-trends', async (req, res) => {
       GROUP BY year_awarded
       ORDER BY year_awarded ASC
     `;
-
     const [results] = await db.query(query);
     res.json(results);
   } catch (error) {
@@ -116,15 +112,12 @@ router.get('/region', async (req, res) => {
       FROM idig_grants
       WHERE region IS NOT NULL AND region != ''
     `;
-    
     const params = [];
     if (year && year !== 'All') {
       query += ' AND year_awarded = ?';
       params.push(year);
     }
-    
-    query += ' GROUP BY TRIM(region) ORDER BY region ASC';
-
+    query += ' GROUP BY region ORDER BY amount DESC';
     const [results] = await db.query(query, params);
     res.json(results);
   } catch (error) {
@@ -145,15 +138,12 @@ router.get('/hei-type', async (req, res) => {
       FROM idig_grants
       WHERE hei_type IS NOT NULL AND hei_type != ''
     `;
-    
     const params = [];
     if (year && year !== 'All') {
       query += ' AND year_awarded = ?';
       params.push(year);
     }
-    
-    query += ' GROUP BY TRIM(hei_type) ORDER BY amount DESC';
-
+    query += ' GROUP BY type ORDER BY amount DESC';
     const [results] = await db.query(query, params);
     res.json(results);
   } catch (error) {
@@ -174,15 +164,12 @@ router.get('/status', async (req, res) => {
       FROM idig_grants
       WHERE status IS NOT NULL AND status != ''
     `;
-    
     const params = [];
     if (year && year !== 'All') {
       query += ' AND year_awarded = ?';
       params.push(year);
     }
-    
     query += ' GROUP BY status ORDER BY amount DESC';
-
     const [results] = await db.query(query, params);
     res.json(results);
   } catch (error) {
@@ -222,6 +209,13 @@ router.post('/upload-csv', upload.single('file'), async (req, res) => {
 
     // Process each row
     for (const row of results) {
+      // Use 'Count' column as the unique reference for project_id
+      const projectId = row['Count'] || row['count'] || row['COUNT'] || null;
+      if (!projectId) {
+        // Skip rows without a valid Count value
+        continue;
+      }
+      // Map CSV columns to DB columns
       const insertQuery = `
         INSERT INTO idig_grants (
           project_id, project_title, year_awarded, hei_name, hei_type, 
@@ -230,21 +224,22 @@ router.post('/upload-csv', upload.single('file'), async (req, res) => {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
+      // Use the correct CSV columns for each DB field
       const values = [
-        row['Project ID'] || row['project_id'] || null,
+        projectId,
         row['Project Title'] || row['project_title'] || null,
-        parseInt(row['Year'] || row['year_awarded']) || null,
+        parseInt(row['Year Awarded'] || row['Year'] || row['year_awarded']) || null,
         row['HEI Name'] || row['hei_name'] || null,
         determineHEIType(row['HEI Name'] || row['hei_name']),
         row['Region'] || row['region'] || null,
         row['Priority Area'] || row['priority_area'] || null,
-        parseCurrency(row['Budget'] || row['budget_approved']),
-        parseCurrency(row['Amount Released'] || row['amount_released']),
+        parseCurrency(row['Amount'] || row['budget_approved']),
+        parseCurrency(row['Disbursed'] || row['amount_released']),
         row['Status'] || row['status'] || null,
         row['Remarks'] || row['remarks'] || null,
-        row['Start Date'] || row['start_date'] || null,
-        row['End Date'] || row['end_date'] || null,
-        row['Extension Date'] || row['extension_date'] || null
+        null, // start_date (not in CSV)
+        null, // end_date (not in CSV)
+        null  // extension_date (not in CSV)
       ];
 
       await db.query(insertQuery, values);

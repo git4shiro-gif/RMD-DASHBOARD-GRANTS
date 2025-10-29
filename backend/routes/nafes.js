@@ -77,15 +77,15 @@ router.get('/yearly-trends', async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT 
-        year_obligated as year,
+        year_awarded as year,
         COUNT(DISTINCT TRIM(control_no)) as projects,
         COALESCE(SUM(budget_approved), 0) as amount,
         COALESCE(SUM(budget_released), 0) as released
       FROM nafes_grants
       WHERE TRIM(control_no) IS NOT NULL AND TRIM(control_no) != ''
-        AND year_obligated IS NOT NULL AND year_obligated != ''
-      GROUP BY year_obligated
-      ORDER BY year_obligated
+        AND year_awarded IS NOT NULL AND year_awarded != ''
+      GROUP BY year_awarded
+      ORDER BY year_awarded
     `);
     // Convert string amounts to numbers
     const formattedRows = rows.map(row => ({
