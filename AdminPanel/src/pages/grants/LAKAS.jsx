@@ -164,11 +164,11 @@ function LAKAS() {
 					</h1>
 					<p style={{ color: '#64748b', fontSize: '1.05rem', margin: '0 0 8px 0', fontWeight: '500' }}>
 						<a href="https://ched.gov.ph/2016-ched-memorandum-orders/" target="_blank" rel="noopener noreferrer" style={{ color: '#0033a0', textDecoration: 'underline' }}>
-							CMO No. 52, s. 2016
+							CMO No.____________
 						</a>
 					</p>
 					<p style={{ color: '#64748b', fontSize: '0.95rem', margin: '0', lineHeight: '1.5' }}>
-						LAKAS research grants support development and innovation initiatives in higher education institutions.
+						Subject
 					</p>
 				</header>
 				   {/* Image Slider (GIA style) */}

@@ -175,7 +175,7 @@ function SALIKHA() {
 					</h1>
 					<p style={{ color: '#64748b', fontSize: '1.05rem', margin: '0 0 8px 0', fontWeight: '500' }}>
 						<a href="https://ched.gov.ph/2016-ched-memorandum-orders/" target="_blank" rel="noopener noreferrer" style={{ color: '#0033a0', textDecoration: 'underline' }}>
-							CMO No. 52, s. 2016
+							CHED-NCCA JMC 2017-5
 						</a>
 					</p>
 					<p style={{ color: '#64748b', fontSize: '0.95rem', margin: '0', lineHeight: '1.5' }}>

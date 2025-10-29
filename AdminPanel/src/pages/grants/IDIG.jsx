@@ -212,7 +212,7 @@ function IDIG() {
             </a>
           </p>
           <p style={{ color: '#64748b', fontSize: '0.95rem', margin: '0', lineHeight: '1.5' }}>
-            IDIG research grants support development and innovation initiatives in higher education institutions.
+            Revised Guidelines for the CHED-Initiated Projects under the Institutional Development and Innovation Grant Program for Higher Education Institutions
           </p>
         </header>
         </div>
